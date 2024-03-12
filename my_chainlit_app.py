@@ -28,7 +28,7 @@ class QABot:
         config = load_configs()
         self.embeddings = self.load_embed(config['embedding_model'])
         self.db = FAISS.load_local(config['dataset']['faiss_db'], self.embeddings, allow_dangerous_deserialization=True)
-        self.llm = self.load_llm(config['llm'])
+        self.llm = self.load_llm()
         self.qa_prompt = self.set_custom_prompt()
         self.memory = self.return_memory()
         self.qa = self.retrive_qa_chain(self.llm, self.qa_prompt, self.db)
@@ -49,37 +49,13 @@ class QABot:
         )
         return embeddings
     
-    def load_llm_2(self):
+    def load_llm(self):
         os.environ['HUGGING_FACE_HUB_API_KEY'] = getpass.getpass('Hugging face api key:')
         repo_id = 'vilm/vinallama-2.7b-chat'  # has 3B parameters: https://huggingface.co/lmsys/fastchat-t5-3b-v1.0
         llm = HuggingFaceHub(huggingfacehub_api_token=os.environ['HUGGING_FACE_HUB_API_KEY'],
                             repo_id=repo_id,
-                            model_kwargs={'temperature':1e-10, 'max_new_tokens':64})
+                            model_kwargs={'temperature':0.1, 'max_new_tokens':64})
         
-        return llm
-
-    def load_llm(self, llm_config):
-        """Load a HuggingFace language model (LLM) based on the given configuration.
-
-        Args:
-            llm_config (dict): Configuration for the language model, including the model path, temperature, max length, and mode.
-
-        Returns:
-            HuggingFacePipeline: An instance of HuggingFacePipeline initialized with the specified configuration.
-        """
-        model_name = llm_config['path']
-        tokenizer = AutoTokenizer.from_pretrained(model_name, padding=True, truncation=True, max_length=llm_config.get('max_length', 512))
-        question_answerer = pipeline(
-            llm_config['mode'], # "text-generation"
-            model=model_name,
-            tokenizer=tokenizer,
-            return_tensors='pt',
-            max_new_tokens = 64,
-        )
-        llm = HuggingFacePipeline(
-            pipeline=question_answerer,
-            model_kwargs={"temperature": llm_config.get('temperature', 0.7), "max_length": llm_config.get('max_length', 512)},
-        )
         return llm
 
     def set_custom_prompt(self):
