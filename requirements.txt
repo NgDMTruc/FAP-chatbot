@@ -1,0 +1,9 @@
+chainlit==1.0.400
+ctransformers==0.2.27
+datasets==2.18.0
+faiss-cpu==1.8.0
+langchain==0.1.11
+sentence-transformers==2.5.1
+torch==2.2.1
+transformers==4.38.2
+pandas

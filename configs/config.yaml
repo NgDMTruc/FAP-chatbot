@@ -1,0 +1,15 @@
+embedding_model:
+  path: 'intfloat/multilingual-e5-large'
+  device: 'cpu'
+  normalize_embeddings: 'false'
+  output_path: './source'
+
+llm:
+  path: 'vilm/vinallama-2.7b-chat'
+  temperature: 0.7
+  max_length: 512
+  mode: 'text-generation'
+    
+dataset:
+  csv_dataset: './data/processed_dataset.csv'
+  faiss_db: './source/multilingual_e5_faiss'
