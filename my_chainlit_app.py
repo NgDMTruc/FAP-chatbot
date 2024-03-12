@@ -1,13 +1,15 @@
+from tools.utils import load_configs
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
 from langchain.chains.conversation.memory import ConversationBufferMemory
-from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
-from transformers import AutoTokenizer, AutoModelForQuestionAnswering, pipeline
-
-from tools.utils import load_configs
-
+from langchain.chains import RetrievalQA
+from langchain import HuggingFaceHub 
+from transformers import AutoTokenizer, pipeline
+import chainlit as cl
+import getpass
+import os
 
 class QABot:
     """A class representing a question answering bot.
@@ -46,6 +48,15 @@ class QABot:
             encode_kwargs={'normalize_embeddings': embedding_config.get('normalize_embeddings', False)}
         )
         return embeddings
+    
+    def load_llm_2(self):
+        os.environ['HUGGING_FACE_HUB_API_KEY'] = getpass.getpass('Hugging face api key:')
+        repo_id = 'vilm/vinallama-2.7b-chat'  # has 3B parameters: https://huggingface.co/lmsys/fastchat-t5-3b-v1.0
+        llm = HuggingFaceHub(huggingfacehub_api_token=os.environ['HUGGING_FACE_HUB_API_KEY'],
+                            repo_id=repo_id,
+                            model_kwargs={'temperature':1e-10, 'max_new_tokens':64})
+        
+        return llm
 
     def load_llm(self, llm_config):
         """Load a HuggingFace language model (LLM) based on the given configuration.
